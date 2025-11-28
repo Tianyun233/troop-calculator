@@ -3,86 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打熊配兵比例计算器</title>
+    <title>Bear Trap Calculator</title>
     <style>
-        /* CSS 样式部分 - 让页面看起来整洁 */
+        /* CSS 样式部分 */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; padding: 20px; max-width: 800px; margin: 0 auto; }
-        h1 { text-align: center; color: #2c3e50; }
-        /* 作者署名样式 */
-        .author-credit { text-align: center; color: #7f8c8d; margin-top: -10px; margin-bottom: 20px; font-size: 1.1em; } 
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
+        /* 语言选择器样式 */
+        .lang-container { text-align: right; margin-bottom: 10px; }
+        .lang-container label { font-weight: bold; margin-right: 5px; color: #555; }
+        select#langSelector { padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
+
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+        .author-credit { text-align: center; color: #7f8c8d; margin-bottom: 20px; font-size: 1.1em; } 
+        
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .section-title { font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #555; }
         
-        /* 输入布局 */
-        .input-group { display: flex; gap: 20px; margin-bottom: 15px; align-items: center; }
-        .input-group label { font-weight: bold; min-width: 100px; }
+        .input-group { display: flex; gap: 20px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+        .input-group label { font-weight: bold; min-width: 120px; }
         input[type="number"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100px; }
         input[type="checkbox"] { transform: scale(1.5); margin-right: 10px; }
 
-        /* 表格布局 */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 10px; text-align: center; border-bottom: 1px solid #eee; }
+        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; font-size: 0.95em; }
         th { background-color: #f8f9fa; color: #444; }
         input.table-input { width: 80%; padding: 5px; text-align: center; }
 
-        /* 按钮 */
         .btn-calc { width: 100%; padding: 15px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 18px; cursor: pointer; transition: background 0.3s; margin-top: 20px; }
         .btn-calc:hover { background-color: #2980b9; }
 
-        /* 结果区域 */
         #result-area { display: none; background-color: #e8f6f3; border: 1px solid #a3e4d7; }
         .result-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.1em; }
         .result-highlight { font-weight: bold; color: #d35400; }
         .notice { font-size: 0.9em; color: #7f8c8d; margin-top: 10px; font-style: italic; }
+        
+        /* 移动端适配小调整 */
+        @media (max-width: 600px) {
+            .input-group { gap: 10px; }
+            th, td { padding: 5px; font-size: 0.85em; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>🐻 打熊配兵比例计算器</h1>
-    <p class="author-credit">作者: #46 烏龍</p> <div class="card">
-        <div class="section-title">战术配置</div>
+    <div class="lang-container">
+        <label for="langSelector">Language:</label>
+        <select id="langSelector" onchange="changeLanguage(this.value)">
+            <option value="zh-CN">简体中文</option>
+            <option value="zh-TW">繁體中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+        </select>
+    </div>
+
+    <h1 data-i18n="title">🐻 打熊配兵比例计算器</h1>
+    
+    <p class="author-credit">
+        <span data-i18n="author_label">作者</span>: <span id="authorName">#46 烏龍</span>
+    </p>
+
+    <div class="card">
+        <div class="section-title" data-i18n="config_title">战术配置</div>
         <div class="input-group">
-            <label>出征容量：</label>
-            <input type="number" id="totalCapacity" placeholder="例如 160000">
+            <label data-i18n="label_capacity">出征容量：</label>
+            <input type="number" id="totalCapacity" placeholder="160000">
         </div>
         <div class="input-group">
-            <label for="rosaToggle" style="cursor: pointer;">
-                <input type="checkbox" id="rosaToggle"> 使用罗莎 (5级)
+            <label for="rosaToggle" style="cursor: pointer; display: flex; align-items: center;">
+                <input type="checkbox" id="rosaToggle"> 
+                <span data-i18n="label_rosa">使用罗莎 (5级)</span>
             </label>
-            <span style="font-size: 0.9em; color: #666;">(勾选后弓兵攻击加成项 x 1.3)</span>
+            <span style="font-size: 0.9em; color: #666; margin-left: 10px;" data-i18n="note_rosa">(勾选后弓兵攻击加成项 x 1.3)</span>
         </div>
     </div>
 
     <div class="card">
-        <div class="section-title">兵种面板数据</div>
+        <div class="section-title" data-i18n="stats_title">兵种面板数据</div>
         <table>
             <thead>
                 <tr>
-                    <th>兵种</th>
-                    <th>初始攻</th>
-                    <th>初始杀</th>
-                    <th>加成攻 (%)</th>
-                    <th>加成杀 (%)</th>
+                    <th data-i18n="th_troop">兵种</th>
+                    <th data-i18n="th_base_atk">初始攻</th>
+                    <th data-i18n="th_base_leth">初始杀</th>
+                    <th data-i18n="th_buff_atk">加成攻 (%)</th>
+                    <th data-i18n="th_buff_leth">加成杀 (%)</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>🛡️ 盾兵</td>
+                    <td data-i18n="troop_inf">🛡️ 盾兵</td>
                     <td><input type="number" class="table-input" id="inf_base_atk"></td>
                     <td><input type="number" class="table-input" id="inf_base_leth"></td>
                     <td><input type="number" class="table-input" id="inf_buff_atk"></td>
                     <td><input type="number" class="table-input" id="inf_buff_leth"></td>
                 </tr>
                 <tr>
-                    <td>🐎 骑兵</td>
+                    <td data-i18n="troop_rid">🐎 骑兵</td>
                     <td><input type="number" class="table-input" id="rid_base_atk"></td>
                     <td><input type="number" class="table-input" id="rid_base_leth"></td>
                     <td><input type="number" class="table-input" id="rid_buff_atk"></td>
                     <td><input type="number" class="table-input" id="rid_buff_leth"></td>
                 </tr>
                 <tr>
-                    <td>🏹 弓兵</td>
+                    <td data-i18n="troop_hun">🏹 弓兵</td>
                     <td><input type="number" class="table-input" id="hun_base_atk"></td>
                     <td><input type="number" class="table-input" id="hun_base_leth"></td>
                     <td><input type="number" class="table-input" id="hun_buff_atk"></td>
@@ -91,26 +115,177 @@
             </tbody>
         </table>
 
-        <button class="btn-calc" onclick="calculateOptimalRatio()">开始计算最佳比例</button>
+        <button class="btn-calc" onclick="calculateOptimalRatio()" data-i18n="btn_calc">开始计算最佳比例</button>
     </div>
 
     <div class="card" id="result-area">
-        <div class="section-title">⚖️ 最佳出征方案</div>
+        <div class="section-title" data-i18n="result_title">⚖️ 最佳出征方案</div>
         <div id="result-content"></div>
     </div>
 
     <script>
+        // --- 1. 多语言词典 ---
+        const translations = {
+            "zh-CN": {
+                title: "🐻 打熊配兵比例计算器",
+                author_label: "作者",
+                config_title: "战术配置",
+                label_capacity: "出征容量：",
+                label_rosa: "使用罗莎 (5级)",
+                note_rosa: "(勾选后弓兵攻击加成项 x 1.3)",
+                stats_title: "兵种面板数据",
+                th_troop: "兵种",
+                th_base_atk: "初始攻",
+                th_base_leth: "初始杀",
+                th_buff_atk: "加成攻 (%)",
+                th_buff_leth: "加成杀 (%)",
+                troop_inf: "🛡️ 盾兵",
+                troop_rid: "🐎 骑兵",
+                troop_hun: "🏹 弓兵",
+                btn_calc: "开始计算最佳比例",
+                result_title: "⚖️ 最佳出征方案",
+                label_total: "总计兵力：",
+                msg_correction: "⚠️ 注意：原始计算盾兵不足 5000，已自动增加盾兵并扣除骑兵数量。",
+                alert_capacity: "请输入有效的出征容量！",
+                alert_stats: "请输入有效的面板数值！"
+            },
+            "zh-TW": {
+                title: "🐻 打熊配兵比例計算器",
+                author_label: "作者",
+                config_title: "戰術配置",
+                label_capacity: "出征容量：",
+                label_rosa: "使用羅莎 (5級)",
+                note_rosa: "(勾選後弓兵攻擊加成項 x 1.3)",
+                stats_title: "兵種面板數據",
+                th_troop: "兵種",
+                th_base_atk: "初始攻",
+                th_base_leth: "初始殺",
+                th_buff_atk: "加成攻 (%)",
+                th_buff_leth: "加成殺 (%)",
+                troop_inf: "🛡️ 盾兵",
+                troop_rid: "🐎 騎兵",
+                troop_hun: "🏹 弓兵",
+                btn_calc: "開始計算最佳比例",
+                result_title: "⚖️ 最佳出征方案",
+                label_total: "總計兵力：",
+                msg_correction: "⚠️ 注意：原始計算盾兵不足 5000，已自動增加盾兵並扣除騎兵數量。",
+                alert_capacity: "請輸入有效的出征容量！",
+                alert_stats: "請輸入有效的面板數值！"
+            },
+            "en": {
+                title: "🐻 Bear Trap Calculator",
+                author_label: "Author",
+                config_title: "Configuration",
+                label_capacity: "March Capacity:",
+                label_rosa: "Use Rosa (Lvl 5)",
+                note_rosa: "(Hunter Atk Buff x 1.3 if checked)",
+                stats_title: "Troop Stats",
+                th_troop: "Troop Type",
+                th_base_atk: "Base Atk",
+                th_base_leth: "Base Leth",
+                th_buff_atk: "Buff Atk (%)",
+                th_buff_leth: "Buff Leth (%)",
+                troop_inf: "🛡️ Infantry",
+                troop_rid: "🐎 Rider",
+                troop_hun: "🏹 Hunter",
+                btn_calc: "Calculate Optimal Ratio",
+                result_title: "⚖️ Optimal Formation",
+                label_total: "Total Troops:",
+                msg_correction: "⚠️ Note: Infantry adjusted to min 5,000. Rider count reduced accordingly.",
+                alert_capacity: "Please enter a valid capacity!",
+                alert_stats: "Please enter valid stats!"
+            },
+            "ja": {
+                title: "🐻 熊狩り編成計算機",
+                author_label: "作者",
+                config_title: "戦術設定",
+                label_capacity: "行軍規模：",
+                label_rosa: "ローザ使用 (Lv 5)",
+                note_rosa: "(チェック時、弓兵攻撃バフ x 1.3)",
+                stats_title: "ステータス入力",
+                th_troop: "兵種",
+                th_base_atk: "基礎攻撃",
+                th_base_leth: "基礎殺傷",
+                th_buff_atk: "攻撃バフ (%)",
+                th_buff_leth: "殺傷バフ (%)",
+                troop_inf: "🛡️ 歩兵",
+                troop_rid: "🐎 騎兵",
+                troop_hun: "🏹 弓兵",
+                btn_calc: "最適比率を計算",
+                result_title: "⚖️ 最適な編成",
+                label_total: "合計兵数：",
+                msg_correction: "⚠️ 注意：歩兵が5000未満のため自動補正されました。騎兵が減少しました。",
+                alert_capacity: "有効な行軍規模を入力してください！",
+                alert_stats: "有効な数値を入力してください！"
+            },
+            "ko": {
+                title: "🐻 곰 사냥 비율 계산기",
+                author_label: "제작자",
+                config_title: "전술 설정",
+                label_capacity: "출정 부대 규모:",
+                label_rosa: "로사 사용 (5레벨)",
+                note_rosa: "(체크 시 사냥꾼 공격력 버프 x 1.3)",
+                stats_title: "스탯 입력",
+                th_troop: "병종",
+                th_base_atk: "기본 공",
+                th_base_leth: "기본 살상",
+                th_buff_atk: "공격력 버프 (%)",
+                th_buff_leth: "살상력 버프 (%)",
+                troop_inf: "🛡️ 보병",
+                troop_rid: "🐎 기병",
+                troop_hun: "🏹 사냥꾼",
+                btn_calc: "최적 비율 계산",
+                result_title: "⚖️ 최적 편성",
+                label_total: "총 병력:",
+                msg_correction: "⚠️ 주의: 보병이 5000 미만이므로 자동 보정되었습니다 (기병 감소).",
+                alert_capacity: "유효한 부대 규모를 입력하세요!",
+                alert_stats: "유효한 수치를 입력하세요!"
+            }
+        };
+
+        let currentLang = "zh-CN"; // 默认语言
+
+        // --- 2. 切换语言函数 ---
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+
+            // 1. 更新带有 data-i18n 属性的文本
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (t[key]) {
+                    element.textContent = t[key];
+                }
+            });
+
+            // 2. 特殊处理：作者名字 (Author Name Logic)
+            const authorNameSpan = document.getElementById('authorName');
+            if (lang === 'zh-CN' || lang === 'zh-TW') {
+                authorNameSpan.textContent = "#46 烏龍";
+            } else {
+                authorNameSpan.textContent = "#46 Oolong";
+            }
+
+            // 如果结果区域已经显示，重新计算以刷新翻译
+            if (document.getElementById('result-area').style.display === 'block') {
+                calculateOptimalRatio();
+            }
+        }
+
+        // --- 3. 计算核心逻辑 ---
         function calculateOptimalRatio() {
+            const t = translations[currentLang]; // 获取当前语言包
+
             // --- A. 获取输入数据 ---
             const capacity = parseFloat(document.getElementById('totalCapacity').value) || 0;
             const useRosa = document.getElementById('rosaToggle').checked;
 
             if (capacity <= 0) {
-                alert("请输入有效的出征容量！");
+                alert(t.alert_capacity);
                 return;
             }
 
-            // 获取各兵种数据 (辅助函数)
+            // 获取各兵种数据
             function getStats(prefix) {
                 return {
                     baseAtk: parseFloat(document.getElementById(prefix + '_base_atk').value) || 0,
@@ -125,19 +300,12 @@
             const hun = getStats('hun');
 
             // --- B. 计算 K 值和权重 (K^2) ---
-            
-            // 计算单兵 K 值的通用函数
-            // K = 初始攻 * 初始杀 * (1 + 加成攻/100) * (1 + 加成杀/100)
             function calculateK(stats, isHunter, rosaActive) {
                 let attackMultiplier = 1 + (stats.buffAtk / 100);
-                
-                // 罗莎逻辑：如果是弓兵且开启罗莎，攻击加成项 * 1.3
                 if (isHunter && rosaActive) {
                     attackMultiplier = attackMultiplier * 1.3;
                 }
-
                 const lethalityMultiplier = 1 + (stats.buffLeth / 100);
-                
                 return stats.baseAtk * stats.baseLeth * attackMultiplier * lethalityMultiplier;
             }
 
@@ -145,55 +313,43 @@
             const k_rid = calculateK(rid, false, useRosa);
             const k_hun = calculateK(hun, true, useRosa);
 
-            // 权重 W = K^2
             const w_inf = k_inf * k_inf;
             const w_rid = k_rid * k_rid;
             const w_hun = k_hun * k_hun;
             const totalWeight = w_inf + w_rid + w_hun;
 
-            // 防止全 0
             if (totalWeight === 0) {
-                alert("请输入有效的面板数值！");
+                alert(t.alert_stats);
                 return;
             }
 
-            // --- C. 初始分配 (按 K^2 比例) ---
-            // 注意：这里计算的是浮点数，留给后面修正
+            // --- C. 初始分配 ---
             const ratio_inf = w_inf / totalWeight;
             const ratio_rid = w_rid / totalWeight;
             const ratio_hun = w_hun / totalWeight;
             
             let rawCountInf = capacity * ratio_inf;
             let rawCountRid = capacity * ratio_rid;
-            let rawCountHun = capacity * ratio_hun;
-
-
+            
             // --- D. 约束修正逻辑 (盾兵保底 5000) ---
             let finalInf = Math.round(rawCountInf);
             let finalRid = Math.round(rawCountRid);
-            let finalHun; // 最终通过减法确定
+            let finalHun; 
             let correctionMsg = "";
 
             const MIN_INFANTRY = 5000;
 
             if (finalInf < MIN_INFANTRY) {
-                // 计算差额
                 const diff = MIN_INFANTRY - finalInf;
-                
-                // 修正：盾兵设为 5000
                 finalInf = MIN_INFANTRY;
-                
-                // 修正：骑兵减去差额
-                finalRid = Math.round(finalRid - diff); // 对修正后的骑兵数量进行四舍五入
-                
-                // 防止骑兵变负数（理论上不应该发生，但为了安全添加）
+                finalRid = Math.round(finalRid - diff);
                 if (finalRid < 0) finalRid = 0;
 
-                correctionMsg = `<div class="notice">⚠️ 注意：原始计算盾兵不足 5000 (${Math.round(rawCountInf)})，已自动增加盾兵并扣除骑兵数量。</div>`;
+                // 使用翻译后的修正提示信息
+                correctionMsg = `<div class="notice">${t.msg_correction} (${Math.round(rawCountInf)})</div>`;
             }
 
-            // --- E. 计算最终弓兵 (保证总数 == 容量) ---
-            // 使用总容量减去盾和骑，确保没有舍入误差
+            // --- E. 计算最终弓兵 ---
             finalHun = capacity - finalInf - finalRid;
 
             // --- F. 渲染结果 ---
@@ -202,26 +358,26 @@
             
             resultArea.style.display = 'block';
             
-            // 计算最终百分比用于显示
             const pInf = ((finalInf / capacity) * 100).toFixed(2);
             const pRid = ((finalRid / capacity) * 100).toFixed(2);
             const pHun = ((finalHun / capacity) * 100).toFixed(2);
 
+            // 动态生成结果 HTML (使用当前语言包 t)
             resultContent.innerHTML = `
                 <div class="result-row">
-                    <span>🛡️ <strong>盾兵 (Infantry)</strong></span>
+                    <span>${t.troop_inf}</span>
                     <span><span class="result-highlight">${finalInf.toLocaleString()}</span> (${pInf}%)</span>
                 </div>
                 <div class="result-row">
-                    <span>🐎 <strong>骑兵 (Rider)</strong></span>
+                    <span>${t.troop_rid}</span>
                     <span><span class="result-highlight">${finalRid.toLocaleString()}</span> (${pRid}%)</span>
                 </div>
                 <div class="result-row">
-                    <span>🏹 <strong>弓兵 (Hunter)</strong></span>
+                    <span>${t.troop_hun}</span>
                     <span><span class="result-highlight">${finalHun.toLocaleString()}</span> (${pHun}%)</span>
                 </div>
                 <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
-                    <strong>总计兵力：</strong> ${(finalInf + finalRid + finalHun).toLocaleString()}
+                    <strong>${t.label_total}</strong> ${ (finalInf + finalRid + finalHun).toLocaleString() }
                 </div>
                 ${correctionMsg}
             `;
