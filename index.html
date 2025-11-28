@@ -8,6 +8,8 @@
         /* CSS 样式部分 - 让页面看起来整洁 */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; padding: 20px; max-width: 800px; margin: 0 auto; }
         h1 { text-align: center; color: #2c3e50; }
+        /* 作者署名样式 */
+        .author-credit { text-align: center; color: #7f8c8d; margin-top: -10px; margin-bottom: 20px; font-size: 1.1em; } 
         .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
         .section-title { font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; color: #555; }
@@ -38,8 +40,7 @@
 <body>
 
     <h1>🐻 打熊配兵比例计算器</h1>
-
-    <div class="card">
+    <p class="author-credit">作者: #46 烏龍</p> <div class="card">
         <div class="section-title">战术配置</div>
         <div class="input-group">
             <label>出征容量：</label>
@@ -157,14 +158,20 @@
             }
 
             // --- C. 初始分配 (按 K^2 比例) ---
-            let rawCountInf = Math.round(capacity * (w_inf / totalWeight));
-            let rawCountRid = Math.round(capacity * (w_rid / totalWeight));
-            // 弓兵先暂定，稍后通过减法保证总数正确
-            // let rawCountHun = capacity - rawCountInf - rawCountRid; 
+            // 注意：这里计算的是浮点数，留给后面修正
+            const ratio_inf = w_inf / totalWeight;
+            const ratio_rid = w_rid / totalWeight;
+            const ratio_hun = w_hun / totalWeight;
+            
+            let rawCountInf = capacity * ratio_inf;
+            let rawCountRid = capacity * ratio_rid;
+            let rawCountHun = capacity * ratio_hun;
+
 
             // --- D. 约束修正逻辑 (盾兵保底 5000) ---
-            let finalInf = rawCountInf;
-            let finalRid = rawCountRid;
+            let finalInf = Math.round(rawCountInf);
+            let finalRid = Math.round(rawCountRid);
+            let finalHun; // 最终通过减法确定
             let correctionMsg = "";
 
             const MIN_INFANTRY = 5000;
@@ -177,17 +184,17 @@
                 finalInf = MIN_INFANTRY;
                 
                 // 修正：骑兵减去差额
-                finalRid = finalRid - diff;
+                finalRid = Math.round(finalRid - diff); // 对修正后的骑兵数量进行四舍五入
                 
-                // 防止骑兵变负数（虽然极少见）
+                // 防止骑兵变负数（理论上不应该发生，但为了安全添加）
                 if (finalRid < 0) finalRid = 0;
 
-                correctionMsg = `<div class="notice">⚠️ 注意：原始计算盾兵不足 5000 (${rawCountInf})，已自动增加盾兵并扣除骑兵数量。</div>`;
+                correctionMsg = `<div class="notice">⚠️ 注意：原始计算盾兵不足 5000 (${Math.round(rawCountInf)})，已自动增加盾兵并扣除骑兵数量。</div>`;
             }
 
             // --- E. 计算最终弓兵 (保证总数 == 容量) ---
             // 使用总容量减去盾和骑，确保没有舍入误差
-            let finalHun = capacity - finalInf - finalRid;
+            finalHun = capacity - finalInf - finalRid;
 
             // --- F. 渲染结果 ---
             const resultArea = document.getElementById('result-area');
@@ -195,7 +202,7 @@
             
             resultArea.style.display = 'block';
             
-            // 计算百分比用于显示
+            // 计算最终百分比用于显示
             const pInf = ((finalInf / capacity) * 100).toFixed(2);
             const pRid = ((finalRid / capacity) * 100).toFixed(2);
             const pHun = ((finalHun / capacity) * 100).toFixed(2);
@@ -203,18 +210,18 @@
             resultContent.innerHTML = `
                 <div class="result-row">
                     <span>🛡️ <strong>盾兵 (Infantry)</strong></span>
-                    <span><span class="result-highlight">${finalInf}</span> (${pInf}%)</span>
+                    <span><span class="result-highlight">${finalInf.toLocaleString()}</span> (${pInf}%)</span>
                 </div>
                 <div class="result-row">
                     <span>🐎 <strong>骑兵 (Rider)</strong></span>
-                    <span><span class="result-highlight">${finalRid}</span> (${pRid}%)</span>
+                    <span><span class="result-highlight">${finalRid.toLocaleString()}</span> (${pRid}%)</span>
                 </div>
                 <div class="result-row">
                     <span>🏹 <strong>弓兵 (Hunter)</strong></span>
-                    <span><span class="result-highlight">${finalHun}</span> (${pHun}%)</span>
+                    <span><span class="result-highlight">${finalHun.toLocaleString()}</span> (${pHun}%)</span>
                 </div>
                 <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
-                    <strong>总计兵力：</strong> ${finalInf + finalRid + finalHun}
+                    <strong>总计兵力：</strong> ${(finalInf + finalRid + finalHun).toLocaleString()}
                 </div>
                 ${correctionMsg}
             `;
