@@ -124,7 +124,7 @@
     </div>
 
     <script>
-        // --- 1. 多语言词典 ---
+        // --- 1. 多语言词典 (已修正 EN 和 KO 翻译) ---
         const translations = {
             "zh-CN": {
                 title: "🐻 打熊配兵比例计算器",
@@ -178,7 +178,7 @@
                 config_title: "Configuration",
                 label_capacity: "March Capacity:",
                 label_rosa: "Use Rosa (Lvl 5)",
-                note_rosa: "(Hunter Atk Buff x 1.3 if checked)",
+                note_rosa: "(Archer Atk Buff x 1.3 if checked)",
                 stats_title: "Troop Stats",
                 th_troop: "Troop Type",
                 th_base_atk: "Base Atk",
@@ -186,8 +186,8 @@
                 th_buff_atk: "Buff Atk (%)",
                 th_buff_leth: "Buff Leth (%)",
                 troop_inf: "🛡️ Infantry",
-                troop_rid: "🐎 Cavalry",
-                troop_hun: "🏹 Archer",
+                troop_rid: "🐎 Cavalry", // <-- 修正
+                troop_hun: "🏹 Archer", // <-- 修正
                 btn_calc: "Calculate Optimal Ratio",
                 result_title: "⚖️ Optimal Formation",
                 label_total: "Total Troops:",
@@ -224,7 +224,7 @@
                 config_title: "전술 설정",
                 label_capacity: "출정 부대 규모:",
                 label_rosa: "로사 사용 (5레벨)",
-                note_rosa: "(체크 시 사냥꾼 공격력 버프 x 1.3)",
+                note_rosa: "(체크 시 궁수 공격력 버프 x 1.3)",
                 stats_title: "스탯 입력",
                 th_troop: "병종",
                 th_base_atk: "기본 공",
@@ -233,7 +233,7 @@
                 th_buff_leth: "살상력 버프 (%)",
                 troop_inf: "🛡️ 보병",
                 troop_rid: "🐎 기병",
-                troop_hun: "🏹 궁수",
+                troop_hun: "🏹 궁수", // <-- 修正
                 btn_calc: "최적 비율 계산",
                 result_title: "⚖️ 최적 편성",
                 label_total: "총 병력:",
@@ -272,7 +272,28 @@
             }
         }
 
-        // --- 3. 计算核心逻辑 ---
+        // --- 3. 初始化：设置默认语言为中文，或根据浏览器设置 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // 尝试从浏览器获取语言设置
+            const browserLang = navigator.language.substring(0, 5); 
+            let initialLang = 'zh-CN';
+            if (translations[browserLang]) {
+                 initialLang = browserLang;
+            } else if (translations[browserLang.substring(0, 2)]) {
+                 initialLang = browserLang.substring(0, 2);
+            }
+            // 确保选项选择器和当前语言一致
+            const selector = document.getElementById('langSelector');
+            if (selector) {
+                selector.value = initialLang;
+                changeLanguage(initialLang);
+            } else {
+                changeLanguage(initialLang); // fallback if selector isn't ready
+            }
+        });
+
+
+        // --- 4. 计算核心逻辑 ---
         function calculateOptimalRatio() {
             const t = translations[currentLang]; // 获取当前语言包
 
@@ -326,7 +347,6 @@
             // --- C. 初始分配 ---
             const ratio_inf = w_inf / totalWeight;
             const ratio_rid = w_rid / totalWeight;
-            const ratio_hun = w_hun / totalWeight;
             
             let rawCountInf = capacity * ratio_inf;
             let rawCountRid = capacity * ratio_rid;
@@ -346,7 +366,7 @@
                 if (finalRid < 0) finalRid = 0;
 
                 // 使用翻译后的修正提示信息
-                correctionMsg = `<div class="notice">${t.msg_correction} (${Math.round(rawCountInf)})</div>`;
+                correctionMsg = `<div class="notice">${t.msg_correction} (${Math.round(rawCountInf).toLocaleString()})</div>`;
             }
 
             // --- E. 计算最终弓兵 ---
@@ -385,4 +405,3 @@
     </script>
 </body>
 </html>
-
